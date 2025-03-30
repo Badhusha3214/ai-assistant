@@ -1,0 +1,8 @@
+pvporcupine==2.2.1
+sounddevice
+numpy
+python-dotenv
+pyaudio
+SpeechRecognition
+requests
+pyttsx3

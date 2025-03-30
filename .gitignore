@@ -1,0 +1,39 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+
+# Environment Variables
+.env
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific
+college_data.json
+*.log
+logs/
+
+# Picovoice and ML models
+*.ppn
+*.pv
+
+# Audio files
+*.wav
+*.mp3
+*.flac
+
+# FAISS indexes and embeddings
+*.index
+*.bin
