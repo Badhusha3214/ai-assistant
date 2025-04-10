@@ -82,6 +82,26 @@ def main():
         print("Falling back to text-based input mode.")
         voice_mode = False
     
+    # Try to initialize servo controller (optional)
+    servo_controller = None
+    try:
+        from servo_interface import ServoInterface
+        # Change the port to match your Arduino connection
+        # Windows: "COM3", "COM4", etc.
+        # Linux: "/dev/ttyACM0", "/dev/ttyUSB0", etc.
+        servo_controller = ServoInterface(port="COM3")
+        if servo_controller.connect():
+            print("Servo controller connected successfully")
+            # Center the servos at startup
+            servo_controller.center()
+        else:
+            servo_controller = None
+    except ImportError:
+        print("Servo interface not available - physical movements disabled")
+    except Exception as e:
+        print(f"Error initializing servo controller: {e}")
+        servo_controller = None
+    
     try:
         if voice_mode and wake_detector:
             # Voice mode with wake word detection
@@ -90,6 +110,11 @@ def main():
                 
                 if wake_word_detected:
                     print(f"\nWake word '{active_wake_word}' detected! Listening for command...")
+                    
+                    # Move servo to listening position if available
+                    if servo_controller:
+                        servo_controller.motion_pattern("listening")
+                        
                     # Listen for command using speech recognition
                     with sr.Microphone() as source:
                         try:
@@ -100,8 +125,17 @@ def main():
                             # Filter out wake word from command
                             filtered_command = command.lower().replace(active_wake_word.lower(), "").strip()
                             if filtered_command:  # Only process if command remains after filtering
+                                # Move servo to thinking position if available
+                                if servo_controller:
+                                    servo_controller.motion_pattern("thinking")
+                                    
                                 response = ai_handler.get_response(filtered_command)
                                 print(f"AI Response: {response}")
+                                
+                                # React to the emotional content of the response
+                                if servo_controller:
+                                    servo_controller.react_to_emotions(response)
+                                    
                                 speech_handler.speak(response)
                             else:
                                 print("No command after filtering wake word")
@@ -125,6 +159,10 @@ def main():
     finally:
         if wake_detector:
             wake_detector.cleanup()
+        if servo_controller:
+            # Return to center position and disconnect
+            servo_controller.center()
+            servo_controller.disconnect()
 
 if __name__ == "__main__":
     main()
