@@ -15,12 +15,27 @@ class RAGHandler:
             print("College data loaded successfully")
         except Exception as e:
             print(f"Error loading college data: {e}")
-            self.college_data = None
+            # Create a minimal placeholder if data is missing
+            self.college_data = {
+                "institution": {
+                    "name": "Kristu Jyoti College",
+                    "accreditation": "Academic Institution",
+                    "contact": {
+                        "email": "info@example.edu",
+                        "phone": "123-456-7890"
+                    },
+                    "departments": [],
+                    "facilities": [],
+                    "student_services": [],
+                    "achievements": []
+                }
+            }
+            print("Created minimal placeholder data")
     
     def generate_rag_prompt(self, query):
         """Generate relevant college information context"""
         if not self.college_data:
-            return ""
+            return "No college information available."
             
         query = query.lower()
         info = self.college_data["institution"]
@@ -33,7 +48,7 @@ class RAGHandler:
         elif any(word in query for word in ["contact", "email", "phone", "address"]):
             return json.dumps({
                 "contact": info["contact"],
-                "location": info["location"]
+                "location": info.get("location", {})
             }, indent=2)
         elif any(word in query for word in ["club", "activity", "service"]):
             return json.dumps(info["student_services"], indent=2)
